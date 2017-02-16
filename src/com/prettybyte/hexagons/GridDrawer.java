@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 import static java.lang.Math.sqrt;
 import java.util.Collection;
@@ -47,14 +47,14 @@ public class GridDrawer {
                     new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent me) {
-                            GridPosition pos = ((Hexagon) me.getSource()).getPosition();
+                            GridPosition pos = ((Hexagon) me.getSource()).position;
                             hexClicked(pos);
                         }
             });
             root.getChildren().add(hexagon);
             
             if (drawCoordinates) {
-                Text text = new Text(hexagon.getPosition().getCoordinates());
+                Text text = new Text(hexagon.position.getCoordinates());
                 text.setFont(font);
                 double textWidth = text.getBoundsInLocal().getWidth();
                 double textHeight = text.getBoundsInLocal().getHeight();
@@ -72,7 +72,7 @@ public class GridDrawer {
      * @param hexagonSize
      * @return the GridPosition that contains that pixel
      */
-    public static GridPosition pixelToPosition(int x, int y, int hexagonSize) {
+    static GridPosition pixelToPosition(int x, int y, int hexagonSize) {
         double q = ((1.0 / 3.0 * sqrt(3.0) * x - 1.0 / 3.0 * y) / hexagonSize);
         double r = (2.0 / 3.0 * (double) y / (double) hexagonSize);
         return (GridPosition.hexRound(q, r));

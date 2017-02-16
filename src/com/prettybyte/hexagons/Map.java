@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,9 +23,13 @@ import java.util.HashMap;
 
 /**
  * Holds all the hexes.
- * Pathfinding, line-of-sight and other useful functions.
+ * Pathfinding, getLine-of-sight and other useful functions.
  */
 public class Map {
+
+    final int graphicsSize;
+    final int graphicsXpadding;
+    final int graphicsYpadding;
 
     public enum Direction {NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST}
 
@@ -33,29 +37,32 @@ public class Map {
 
     private static Map instance = null;
 
-    public Map() {
+    public Map(int graphicsSize, int graphicsXpadding, int graphicsYpadding) {
+        this.graphicsSize = graphicsSize;
+        this.graphicsXpadding = graphicsXpadding;
+        this.graphicsYpadding = graphicsYpadding;
     }
 
-    /**
-     * Map is a Singleton class
-     *
-     * @return the instance
-     */
-    public static Map getInstance() {
-        if (instance == null) {
-            instance = new Map();
-        }
-        return instance;
+    public Hexagon addHexagon(Hexagon hexagon) {
+        hexagon.setMap(this);
+        hexagons.put(hexagon.position, hexagon);
+        return hexagon;
+    }
+
+    public Hexagon getHexagonContainingPixel(int x, int y) throws NoHexagonException {
+        return getHexagon(GridDrawer.pixelToPosition(x, y, graphicsSize));
     }
 
     /**
      * Retrieves the Hexagon at the specified position
      *
-     * @param position the position
+     * @param q
+     * @param r
      * @return the Hexagon
      * @throws NoHexagonException if there is no Hexagon at the specified position
      */
-    public Hexagon getHexagon(GridPosition position) throws NoHexagonException {
+    public Hexagon getHexagon(int q, int r) throws NoHexagonException {
+        GridPosition position = new GridPosition(q, r);
         Hexagon result = hexagons.get(position);
         if (result == null) {
             throw new NoHexagonException("The Hexagon does not exist");
@@ -63,17 +70,12 @@ public class Map {
         return result;
     }
 
-    Hexagon getHexagonByCube(int x, int y, int z) throws NoHexagonException {
-        return getHexagon(new GridPosition(x, z));
+    Hexagon getHexagon(GridPosition position) throws NoHexagonException {
+        return getHexagon(position.q, position.r);
     }
 
-    /**
-     * Adds a Hexagon to the map
-     *
-     * @param hexagon the Hexagon that should be added to the map
-     */
-    public void addHexagon(Hexagon hexagon) {
-        hexagons.put(hexagon.getPosition(), hexagon);
+    Hexagon getHexagonByCube(int x, int y, int z) throws NoHexagonException {
+        return getHexagon(x, z);
     }
 
     /**
@@ -91,10 +93,10 @@ public class Map {
      * @param direction
      * Hexagon class
      * @return
-     * @throws com.prettybyte.hexagonz.NoHexagonException
+     * @throws com.prettybyte.hexagons.NoHexagonException
      */
     public Hexagon getNeighbour(Hexagon hexagon, Direction direction) throws NoHexagonException {
-        GridPosition neighborPosition = hexagon.getPosition().getNeighborPosition(direction);
+        GridPosition neighborPosition = hexagon.position.getNeighborPosition(direction);
         return getHexagon(neighborPosition);
     }
 
@@ -104,20 +106,15 @@ public class Map {
      * @param hexagon
      * @return
      */
-    public Hexagon[] getNeighbours(Hexagon hexagon) {
-        Hexagon[] tempResult = new Hexagon[6];
-        Hexagon neighbour;
-        int numberOfNeighbours = 0;
+    public ArrayList<Hexagon> getNeighbours(Hexagon hexagon) {
+        ArrayList<Hexagon> result = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             try {
-                neighbour = getNeighbour(hexagon, GridPosition.getDirectionFromNumber(i));
-                tempResult[numberOfNeighbours] = neighbour;
-                numberOfNeighbours++;
+                Hexagon neighbour = getNeighbour(hexagon, GridPosition.getDirectionFromNumber(i));
+                result.add(neighbour);
             } catch (NoHexagonException ex) {
             }
         }
-        Hexagon[] result = new Hexagon[numberOfNeighbours];
-        System.arraycopy(tempResult, 0, result, 0, numberOfNeighbours);
         return result;
     }
 
@@ -136,13 +133,13 @@ public class Map {
         ArrayList<Hexagon> openSet = new ArrayList<>();   // The set of tentative nodes to be evaluated, initially containing the start node
         openSet.add(start);
         start.aStarGscore = 0;
-        start.aStarFscore = start.aStarGscore + GridPosition.getDistance(start.getPosition(), destination.getPosition());
+        start.aStarFscore = start.aStarGscore + GridPosition.getDistance(start.position, destination.position);
 
         Hexagon currentHexagon;
         int tentative_g_score;
         while (openSet.size() > 0) {
             currentHexagon = findHexagonWithLowestFscore(openSet);
-            if (currentHexagon.getPosition().equals(destination.getPosition())) {
+            if (currentHexagon.position.equals(destination.position)) {
                 return reconstruct_path(start, destination);
             }
             openSet.remove(currentHexagon);
@@ -156,10 +153,10 @@ public class Map {
                         if (!openSet.contains(neighbour) || tentative_g_score < neighbour.aStarGscore) {
                             neighbour.aStarCameFrom = currentHexagon;
                             neighbour.aStarGscore = tentative_g_score;
-                            neighbour.aStarFscore = neighbour.aStarGscore + GridPosition.getDistance(neighbour.getPosition(), destination.getPosition());
+                            neighbour.aStarFscore = neighbour.aStarGscore + GridPosition.getDistance(neighbour.position, destination.position);
 
                             /*
-                            TODO: Vill få den att generera path som är mer som line() så att de inte rör sig kantigt på kartan. Nedanstående funkar sådär:
+                            TODO: Vill få den att generera path som är mer som getLine() så att de inte rör sig kantigt på kartan. Nedanstående funkar sådär:
                             neighbour.aStarFscore = neighbour.aStarGscore + neighbour.getGraphicsDistanceTo(destination);
 
                             Ett sätt kunde vara att undersöka om man kan identifiera hex där path går runt ett hörn (har de unika g-värden?), dvs en ruta som definitivt ska besökas och sedan mäta det grafiska avståndet till dem som f-värde.
@@ -225,13 +222,17 @@ public class Map {
     }
 
     /**
-     * Finds all Hexagons that are on a line between two positions
+     * Finds all Hexagons that are on a getLine between two Hexagons
      *
      * @param origin
      * @param destination
      * @return
      */
-    public ArrayList<Hexagon> line(GridPosition origin, GridPosition destination) {
+    public ArrayList<Hexagon> getLine(Hexagon origin, Hexagon destination) {
+        return getLine(origin.position, destination.position);
+    }
+
+    private ArrayList<Hexagon> getLine(GridPosition origin, GridPosition destination) {
         Hexagon h;
         ArrayList<Hexagon> result = new ArrayList<>();
         ArrayList<GridPosition> positions = origin.line(destination);
@@ -247,8 +248,8 @@ public class Map {
     }
 
     /**
-     * Calculates all Hexagons that are visible from the given position. The
-     * line of sight can be blocked by Hexagons that has isVisualObstacle ==
+     * Calculates all Hexagons that are visible from a specific Hexagon. The
+     * getLine of sight can be blocked by Hexagons that has isVisualObstacle ==
      * true. NOTE: Accuracy is not guaranteed!
      *
      * @param origin
@@ -257,12 +258,11 @@ public class Map {
      * @return an array of Hexagons that are visible
      */
     public ArrayList<Hexagon> getVisibleHexes(Hexagon origin, int visibleRange) {
-        GridPosition[] ringMembers = origin.getPosition().getPositionsInRing(visibleRange);
+        ArrayList<GridPosition> ringMembers = origin.position.getPositionsOnCircleEdge(visibleRange);
         ArrayList<Hexagon> result = new ArrayList<>();
-
         ArrayList<Hexagon> line;
         for (GridPosition ringMemberPosition : ringMembers) {
-            line = line(origin.getPosition(), ringMemberPosition);
+            line = getLine(origin.position, ringMemberPosition);
             for (Hexagon hexagonInLine : line) {
                 result.add(hexagonInLine);
                 if (hexagonInLine.isVisualObstacle()) {

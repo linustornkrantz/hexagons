@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 import java.io.Serializable;
 import static java.lang.Math.abs;
@@ -24,27 +24,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Stores coordinates and has functions for grid calculations, e.g. line, ring
+ * Stores coordinates and has functions for grid calculations, e.g. getLine, ring
  * and distance. These calculations do not depend on how you have placed the
  * Hexagons on the Map. The axial coordinate system is used.
  */
-public class GridPosition implements Cloneable, Serializable {
+class GridPosition implements Cloneable, Serializable {
 
     /**
      * The Axial Q coordinate
      */
-    public int q;
+    int q;
 
     /**
      * The Axial R coordinate
      */
-    public int r;
+    int r;
 
     /**
      * @param q the axial Q coordinate
      * @param r the axial R coordinate
      */
-    public GridPosition(int q, int r) {
+    GridPosition(int q, int r) {
         this.q = q;
         this.r = r;
     }
@@ -61,42 +61,46 @@ public class GridPosition implements Cloneable, Serializable {
             {0, -1}, {+1, -1}, {+1, 0}, {0, +1}, {-1, +1}, {-1, 0}
         };
         int[] d = neighbors[i];
-
-        GridPosition neigborPosition = new GridPosition(q + d[0], r + d[1]);
-        return neigborPosition;
+        return new GridPosition(q + d[0], r + d[1]);
     }
 
     /**
-     * Finds all positions that are in a ring in which this position is the
+     * Finds all positions that are on the edge of a circle in which this position is the
      * center. 
      * If radius is 0, an array with only this GridPosition will be returned.
      *
      * @param radius
      * @return
      */
-    public GridPosition[] getPositionsInRing(int radius) {
+    ArrayList<GridPosition> getPositionsOnCircleEdge(int radius) {
+        ArrayList<GridPosition> result = new ArrayList<>();
         if (radius == 0) {
-            GridPosition[] results = new GridPosition[1];
-            results[0] = this;
-            return results;
+            result.add(this);
+            return result;
         } else {
             GridPosition h = this;
             for (int i = 0; i < radius; i++) {
                 h = h.getNeighborPosition(Map.Direction.SOUTHWEST);
             }
-
-            GridPosition[] results = new GridPosition[radius * 6];
-
             int counter = 0;
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < radius; j++) {
-                    results[counter] = h.clone();
+                    result.add(h.clone());
                     counter++;
                     h = h.getNeighborPosition(getDirectionFromNumber(i));
                 }
             }
-            return results;
+            return result;
         }
+    }
+
+    ArrayList<GridPosition> getPositionsInCircleArea(int radius) {
+        ArrayList<GridPosition> result = new ArrayList<>();
+        for (int i = 0; i <= radius; i++) {
+            ArrayList<GridPosition> positions = getPositionsOnCircleEdge(i);
+            result.addAll(positions);
+        }
+        return result;
     }
 
     private static int getNumberFromDirection(Map.Direction direction) {
@@ -217,7 +221,7 @@ public class GridPosition implements Cloneable, Serializable {
      */
     public Map.Direction getDirectionTo(GridPosition otherPosition) {
         if (this.equals(otherPosition)) {
-            throw new RuntimeException("Other position ("+otherPosition.toString()+") cannot be same as this ("+toString()+")");
+            throw new IllegalArgumentException("Other position ("+otherPosition.toString()+") cannot be same as this ("+toString()+")");
         }
         GridPosition firstStepInLine = line(otherPosition).get(1);
 
@@ -230,7 +234,7 @@ public class GridPosition implements Cloneable, Serializable {
     }
 
     /**
-     * Finds all GridPositions that are on a line between this and the given
+     * Finds all GridPositions that are on a getLine between this and the given
      * position (the array includes this and the destination positions)
      *
      * @param destination
@@ -249,7 +253,7 @@ public class GridPosition implements Cloneable, Serializable {
             result.add(p);
 
         }
-        result.add(destination);              // TODO: sista positionen borde också komma med!? Jag löste det genom att lägga till den manuellt. OK?
+        result.add(destination);
         return result;
     }
 
@@ -270,6 +274,6 @@ public class GridPosition implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return "GridPosition Q=" + q + ", R=" + r;
+        return "GridPosition q=" + q + ", r=" + r;
     }
 }

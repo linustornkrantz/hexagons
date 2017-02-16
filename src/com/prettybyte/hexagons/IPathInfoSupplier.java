@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 public interface IPathInfoSupplier {
     public boolean isBlockingPath(Hexagon hexagon);

@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.prettybyte.hexagons;
 
-package com.prettybyte.hexagonz.generator;
+/**
+ * This exception is thrown when the pathfinding algorithm cannot find any path to the goal
+ */
+public class NoPathException extends Exception {
 
-import com.prettybyte.hexagonz.GridPosition;
-import javafx.scene.paint.Color;
-
-public interface IHexagonCreator {
-    void createHexagon(GridPosition position, Color color);
+    public NoPathException(String message) {
+        super(message);
+    }
 }

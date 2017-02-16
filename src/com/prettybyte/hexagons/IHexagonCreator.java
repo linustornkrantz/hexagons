@@ -14,14 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.prettybyte.hexagonz;
 
-/**
- * This exception is thrown when trying to retrieve a Hexagon from a position where ther is no Hexagon
- */
-public class NoHexagonException extends Exception {
+package com.prettybyte.hexagons;
 
-    public NoHexagonException(String message) {
-        super(message);
-    }
+import javafx.scene.paint.Color;
+
+public interface IHexagonCreator {
+    void createHexagon(int q, int r, Color color);
 }

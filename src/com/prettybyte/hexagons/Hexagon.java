@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 import javafx.scene.paint.Color;
 import static java.lang.Math.PI;
@@ -25,12 +25,15 @@ import static java.lang.Math.sqrt;
 import javafx.application.Platform;
 import javafx.scene.shape.Polygon;
 
+import java.util.ArrayList;
+
 /**
  * A Hexagon is the building block of the grid.
  */
 public class Hexagon extends Polygon {
 
-    private final GridPosition position;
+    final GridPosition position;
+    private Map map;
     private boolean isVisualObstacle;
     private boolean isBlockingPath;
     int aStarGscore, aStarFscore;      // Variables for the A* pathfinding algorithm.
@@ -39,21 +42,27 @@ public class Hexagon extends Polygon {
     private double graphicsWidth;
     private int graphicsXoffset;
     private int graphicsYoffset;
-    private final int graphicsSize;
-    private final int graphicsXpadding;
-    private final int graphicsYpadding;
 
     /**
-     * @param position Where the Hexagon is located on the grid.
-     * @param graphicsSize
-     * @param graphicsXpadding
-     * @param graphicsYpadding
+     * @param q
+     * @param r
      */
-    public Hexagon(GridPosition position, int graphicsSize, int graphicsXpadding, int graphicsYpadding) {
-        this.position = position;
-        this.graphicsSize = graphicsSize;
-        this.graphicsXpadding = graphicsXpadding;
-        this.graphicsYpadding = graphicsYpadding;
+    public Hexagon(int q, int r) {
+        this.position = new GridPosition(q, r);
+    }
+
+    /**
+     * @param q
+     * @param r
+     * @map map
+     */
+    public Hexagon(int q, int r, Map map) {
+        this.position = new GridPosition(q, r);
+        this.map = map;
+        init();
+    }
+
+    private void init() {
         this.setStroke(Color.BLACK);
         for (double p : calculatePolygonPoints()) {
             this.getPoints().add(p);
@@ -61,11 +70,27 @@ public class Hexagon extends Polygon {
     }
 
     /**
+     *
+     * @return axial Q-value
+     */
+    public int getQ() {
+        return position.q;
+    }
+
+    /**
+     *
+     * @return axial R-value
+     */
+    public int getR() {
+        return position.r;
+    }
+
+    /**
      * @return the axial coordinates of the Hexagon
      */
-    public GridPosition getPosition() {
-        return position;
-    }
+//    public GridPosition getPosition() {
+  //      return position;
+    //}
 
     /**
      * This affects the field of view calculations. If true, the hexagons behind
@@ -109,19 +134,19 @@ public class Hexagon extends Polygon {
 
     // --------------------- Graphics --------------------------------------------
     private double[] calculatePolygonPoints() {
-        graphicsHeight = graphicsSize * 2;
+        graphicsHeight = map.graphicsSize * 2;
         graphicsWidth = sqrt(3) / 2 * graphicsHeight;
         graphicsXoffset = (int) (graphicsWidth * (double) position.q + 0.5 * graphicsWidth * (double) position.r);
         graphicsYoffset = (int) (3.0 / 4.0 * graphicsHeight * position.r);
-        graphicsXoffset = graphicsXoffset + graphicsXpadding;
-        graphicsYoffset = graphicsYoffset + graphicsYpadding;
+        graphicsXoffset = graphicsXoffset + map.graphicsXpadding;
+        graphicsYoffset = graphicsYoffset + map.graphicsYpadding;
 
         double polyPoints[] = new double[12];
         double angle;
         for (int i = 0; i < 6; i++) {
             angle = 2 * PI / 6 * (i + 0.5);
-            polyPoints[(i * 2)] = (graphicsXoffset + graphicsSize * cos(angle));
-            polyPoints[(i * 2 + 1)] = (graphicsYoffset + graphicsSize * sin(angle));
+            polyPoints[(i * 2)] = (graphicsXoffset + map.graphicsSize * cos(angle));
+            polyPoints[(i * 2 + 1)] = (graphicsYoffset + map.graphicsSize * sin(angle));
         }
         return polyPoints;
     }
@@ -168,9 +193,60 @@ public class Hexagon extends Polygon {
 
     @Override
     public String toString() {
-        return "Hexagon q:"+getPosition().q +" r:"+getPosition().r;
+        return "Hexagon q:"+position.q +" r:"+position.r;
     }
 
+    public Map.Direction getDirectionTo(Hexagon target) {
+        return position.getDirectionTo(target.position);
+    }
+
+    public ArrayList<Hexagon> getPositionsOnCircleEdge(int radius) {
+        ArrayList<Hexagon> result = new ArrayList<>();
+        for (GridPosition position : position.getPositionsOnCircleEdge(radius)) {
+            try {
+                Hexagon hexagon = map.getHexagon(position);
+                result.add(hexagon);
+            } catch (NoHexagonException e) {
+            }
+        }
+        return result;
+    }
+
+    public ArrayList<Hexagon> getPositionsInCircleArea(int radius) {
+        ArrayList<Hexagon> result = new ArrayList<>();
+        for (GridPosition position : position.getPositionsInCircleArea(radius)) {
+            try {
+                Hexagon hexagon = map.getHexagon(position);
+                result.add(hexagon);
+            } catch (NoHexagonException e) {
+            }
+        }
+        return result;
+    }
+
+    public int getDistance(Hexagon target) {
+        return position.getDistance(target.position);
+    }
+
+    /**
+     * Two Hexagons are equal if they have the same q and r
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!obj.getClass().equals(this.getClass())) {
+            return false;
+        }
+        Hexagon hexagonObj = (Hexagon) obj;
+        return (hexagonObj.getQ() == this.getQ() && hexagonObj.getR() == this.getR());
+    }
+
+    void setMap(Map map) {
+        this.map = map;
+        init();
+    }
 
     class UIupdater implements Runnable {
 

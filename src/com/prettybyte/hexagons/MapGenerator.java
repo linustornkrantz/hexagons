@@ -15,11 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.prettybyte.hexagonz.generator;
+package com.prettybyte.hexagons;
 
-import com.prettybyte.hexagonz.GridPosition;
-import com.prettybyte.hexagonz.Hexagon;
-import com.prettybyte.hexagonz.Map;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
@@ -84,7 +81,7 @@ public class MapGenerator {
      * 
      * @param creator the object that will actually create the Hexagon.
      */
-    public void generate(IHexagonCreator creator) {
+    public void generate(IHexagonCreator creator, Map map) {
         PixelReader pr = image.getPixelReader();
         double imageWidth = image.getWidth();
         double imageHeight = image.getHeight();
@@ -99,10 +96,9 @@ public class MapGenerator {
             for (int y = 0; y < mapHeight; y++) {
                 int axialQ = x - (y - (y & 1)) / 2;
                 int axialR = y;
-                GridPosition position = new GridPosition(axialQ, axialR);
-                Hexagon h = new Hexagon(position, hexagonSize, 0, 0);
+                Hexagon h = new Hexagon(axialQ, axialR, map);
                 Color pixelColor = pr.getColor((int) (h.getGraphicsXoffset() * horizontalRelation), (int) (h.getGraphicsYoffset() * horizontalRelation));
-                creator.createHexagon(position, pixelColor);
+                creator.createHexagon(axialQ, axialR, pixelColor);
             }
         }
     }

@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
 /**
- * This exception is thrown when the pathfinding algorithm cannot find any path to the goal
+ * This exception is thrown when trying to retrieve a Hexagon from a position where ther is no Hexagon
  */
-public class NoPathException extends Exception {
+public class NoHexagonException extends Exception {
 
-    public NoPathException(String message) {
+    public NoHexagonException(String message) {
         super(message);
     }
 }
