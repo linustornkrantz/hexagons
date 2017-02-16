@@ -1,7 +1,5 @@
-package test.com.prettybyte.hexagonz;
+package com.prettybyte.hexagons;
 
-import com.prettybyte.hexagons.Hexagon;
-import com.prettybyte.hexagons.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
