@@ -1,3 +1,8 @@
 .idea/
 Hexagonz.iml
 out/
+gradlew.bat
+gradlew
+gradle/
+build/
+.gradle/
