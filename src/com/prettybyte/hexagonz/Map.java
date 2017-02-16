@@ -22,16 +22,12 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
+ * Holds all the hexes.
  * Pathfinding, line-of-sight and other useful functions.
  */
 public class Map {
 
-    public static final int NORTHWEST = 0;
-    public static final int NORTHEAST = 1;
-    public static final int EAST = 2;
-    public static final int SOUTHEAST = 3;
-    public static final int SOUTHWEST = 4;
-    public static final int WEST = 5;
+    public enum Direction {NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST}
 
     private HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
 
@@ -55,10 +51,9 @@ public class Map {
     /**
      * Retrieves the Hexagon at the specified position
      *
-     * @param position the position in t
+     * @param position the position
      * @return the Hexagon
-     * @throws NoHexagonException if there is no Hexagon at the specified
-     * position, an exception is thrown.
+     * @throws NoHexagonException if there is no Hexagon at the specified position
      */
     public Hexagon getHexagon(GridPosition position) throws NoHexagonException {
         Hexagon result = hexagons.get(position);
@@ -90,14 +85,51 @@ public class Map {
     }
 
     /**
+     * Finds the neighbour of the given Hexagon
+     *
+     * @param hexagon
+     * @param direction
+     * Hexagon class
+     * @return
+     * @throws com.prettybyte.hexagonz.NoHexagonException
+     */
+    public Hexagon getNeighbour(Hexagon hexagon, Direction direction) throws NoHexagonException {
+        GridPosition neighborPosition = hexagon.getPosition().getNeighborPosition(direction);
+        return getHexagon(neighborPosition);
+    }
+
+    /**
+     * Finds all neighbors of the given Hexagon
+     *
+     * @param hexagon
+     * @return
+     */
+    public Hexagon[] getNeighbours(Hexagon hexagon) {
+        Hexagon[] tempResult = new Hexagon[6];
+        Hexagon neighbour;
+        int numberOfNeighbours = 0;
+        for (int i = 0; i < 6; i++) {
+            try {
+                neighbour = getNeighbour(hexagon, GridPosition.getDirectionFromNumber(i));
+                tempResult[numberOfNeighbours] = neighbour;
+                numberOfNeighbours++;
+            } catch (NoHexagonException ex) {
+            }
+        }
+        Hexagon[] result = new Hexagon[numberOfNeighbours];
+        System.arraycopy(tempResult, 0, result, 0, numberOfNeighbours);
+        return result;
+    }
+
+    /**
      * Finds the cheapest path from start to the goal. The A* algorithm is used.
+     * This method uses the method isBlockingPath() in Hexagon and the movement cost between neighboring hexagons is always 1.
      *
      * @param start the Hexagon that you are starting from
      * @param destination the target Hexagon
      * @param pathInfoSupplier a class implementing the IPathInfoSupplier interface
      * @return an array of Hexagons, sorted so that the first step comes first.
-     * @throws NoPathException if there exists no path between start and the
-     * goal
+     * @throws NoPathException if there exists no path between start and the goal
      */
     public ArrayList<Hexagon> getPathBetween(Hexagon start, Hexagon destination, IPathInfoSupplier pathInfoSupplier) throws NoPathException {
         ArrayList<Hexagon> closedSet = new ArrayList<>();    // The set of nodes already evaluated
@@ -117,7 +149,7 @@ public class Map {
             closedSet.add(currentHexagon);
 
             for (Hexagon neighbour : getNeighbours(currentHexagon)) {
-                if (!pathInfoSupplier.isBlockingPath(neighbour)) {
+                if ((!pathInfoSupplier.isBlockingPath(neighbour)) || neighbour.equals(destination)) {
                     if (!closedSet.contains(neighbour)) {
                         tentative_g_score = currentHexagon.aStarGscore + pathInfoSupplier.getMovementCost(currentHexagon, neighbour);
 
@@ -125,6 +157,13 @@ public class Map {
                             neighbour.aStarCameFrom = currentHexagon;
                             neighbour.aStarGscore = tentative_g_score;
                             neighbour.aStarFscore = neighbour.aStarGscore + GridPosition.getDistance(neighbour.getPosition(), destination.getPosition());
+
+                            /*
+                            TODO: Vill få den att generera path som är mer som line() så att de inte rör sig kantigt på kartan. Nedanstående funkar sådär:
+                            neighbour.aStarFscore = neighbour.aStarGscore + neighbour.getGraphicsDistanceTo(destination);
+
+                            Ett sätt kunde vara att undersöka om man kan identifiera hex där path går runt ett hörn (har de unika g-värden?), dvs en ruta som definitivt ska besökas och sedan mäta det grafiska avståndet till dem som f-värde.
+                             */
                             if (!openSet.contains(neighbour)) {
                                 openSet.add(neighbour);
                             }
@@ -135,7 +174,7 @@ public class Map {
         }
         throw new NoPathException("Can't find any path to the goal Hexagon");
     }
-    
+
     /**
      * Finds the cheapest path from start to the goal. The A* algorithm is used.
      * This method uses the method isBlockingPath() in Hexagon and the movement cost between neighboring hexagons is always 1.
@@ -165,7 +204,6 @@ public class Map {
     private Hexagon findHexagonWithLowestFscore(ArrayList<Hexagon> openSet) {
         Hexagon hexagonWithLowestFscore = openSet.get(0);          // Just pick anyone and then see if we can find any better
         int lowestFscore = hexagonWithLowestFscore.aStarFscore;
-
         for (Hexagon h : openSet) {
             if (h.aStarFscore < lowestFscore) {
                 hexagonWithLowestFscore = h;
@@ -184,43 +222,6 @@ public class Map {
         }
         Collections.reverse(path);
         return path;
-    }
-
-    /**
-     * Finds the neighbour of the given Hexagon
-     *
-     * @param hexagon
-     * @param direction an int between 1-6 according to the constants in the
-     * Hexagon class
-     * @return
-     * @throws Hexagonz.NoHexagonException
-     */
-    public Hexagon getNeighbour(Hexagon hexagon, int direction) throws NoHexagonException {
-        GridPosition neighborPosition = hexagon.getPosition().getNeighborPosition(direction);
-        return getHexagon(neighborPosition);
-    }
-
-    /**
-     * Finds all neighbors of the given Hexagon
-     *
-     * @param hexagon
-     * @return
-     */
-    public Hexagon[] getNeighbours(Hexagon hexagon) {
-        Hexagon[] tempResult = new Hexagon[6];
-        Hexagon neighbour;
-        int numberOfNeighbours = 0;
-        for (int i = 0; i < 6; i++) {
-            try {
-                neighbour = getNeighbour(hexagon, i);
-                tempResult[numberOfNeighbours] = neighbour;
-                numberOfNeighbours++;
-            } catch (NoHexagonException ex) {
-            }
-        }
-        Hexagon[] result = new Hexagon[numberOfNeighbours];
-        System.arraycopy(tempResult, 0, result, 0, numberOfNeighbours);
-        return result;
     }
 
     /**
@@ -251,7 +252,7 @@ public class Map {
      * true. NOTE: Accuracy is not guaranteed!
      *
      * @param origin
-     * @param visibleRange a limit of how long distance can be seen even if
+     * @param visibleRange a limit of how long distance can be seen assuming
      * there are no obstacles
      * @return an array of Hexagons that are visible
      */

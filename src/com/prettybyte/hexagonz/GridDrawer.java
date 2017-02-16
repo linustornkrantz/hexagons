@@ -27,9 +27,7 @@ import javafx.scene.text.Text;
 public class GridDrawer {
     
     private final Group root;
-    
     private final Map map;
-    private boolean drawCoordinates = false;
     private javafx.scene.text.Font font = new Font(13);
 
     /**
@@ -42,7 +40,7 @@ public class GridDrawer {
         this.map = map;
     }
     
-    public void drawGroup() {
+    public void drawGroup(boolean drawCoordinates) {
         Collection<Hexagon> hexagons = map.getAllHexagons();
         for (Hexagon hexagon : hexagons) {
             hexagon.addEventFilter(MouseEvent.MOUSE_CLICKED,
@@ -52,7 +50,6 @@ public class GridDrawer {
                             GridPosition pos = ((Hexagon) me.getSource()).getPosition();
                             hexClicked(pos);
                         }
-                    ;
             });
             root.getChildren().add(hexagon);
             
@@ -79,15 +76,6 @@ public class GridDrawer {
         double q = ((1.0 / 3.0 * sqrt(3.0) * x - 1.0 / 3.0 * y) / hexagonSize);
         double r = (2.0 / 3.0 * (double) y / (double) hexagonSize);
         return (GridPosition.hexRound(q, r));
-    }
-
-    /**
-     * If set, the axial coordinates will be written on the grid.
-     *
-     * @param b
-     */
-    public void setDrawCoordinates(boolean b) {
-        drawCoordinates = b;
     }
 
     /**

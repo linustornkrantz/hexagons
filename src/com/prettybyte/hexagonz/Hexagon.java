@@ -160,6 +160,18 @@ public class Hexagon extends Polygon {
         Platform.runLater(new UIupdater(this, c));
     }
 
+    public int getGraphicsDistanceTo(Hexagon destination) {
+        int deltaX = this.getGraphicsXoffset() - destination.getGraphicsXoffset();
+        int deltaY = this.getGraphicsYoffset() - destination.getGraphicsYoffset();
+        return (int) Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    }
+
+    @Override
+    public String toString() {
+        return "Hexagon q:"+getPosition().q +" r:"+getPosition().r;
+    }
+
+
     class UIupdater implements Runnable {
 
         private final Hexagon h;

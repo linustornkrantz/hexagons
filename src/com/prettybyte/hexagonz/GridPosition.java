@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 /**
  * Stores coordinates and has functions for grid calculations, e.g. line, ring
- * and distance. These calculations does not depend on how you have placed the
+ * and distance. These calculations do not depend on how you have placed the
  * Hexagons on the Map. The axial coordinate system is used.
  */
 public class GridPosition implements Cloneable, Serializable {
@@ -52,15 +52,15 @@ public class GridPosition implements Cloneable, Serializable {
     /**
      * Finds the adjacent position in the specified direction from this position
      *
-     * @param direction an int between 1-6 according to the constants in the
-     * Hexagon class
+     * @param direction
      * @return the adjacent position
      */
-    public GridPosition getNeighborPosition(int direction) {
+    public GridPosition getNeighborPosition(Map.Direction direction) {
+        int i = getNumberFromDirection(direction);
         int[][] neighbors = new int[][]{
-            {+1, 0}, {+1, -1}, {0, -1}, {-1, 0}, {-1, +1}, {0, +1}
+            {0, -1}, {+1, -1}, {+1, 0}, {0, +1}, {-1, +1}, {-1, 0}
         };
-        int[] d = neighbors[direction];
+        int[] d = neighbors[i];
 
         GridPosition neigborPosition = new GridPosition(q + d[0], r + d[1]);
         return neigborPosition;
@@ -82,7 +82,7 @@ public class GridPosition implements Cloneable, Serializable {
         } else {
             GridPosition h = this;
             for (int i = 0; i < radius; i++) {
-                h = h.getNeighborPosition(Map.SOUTHWEST);
+                h = h.getNeighborPosition(Map.Direction.SOUTHWEST);
             }
 
             GridPosition[] results = new GridPosition[radius * 6];
@@ -92,19 +92,43 @@ public class GridPosition implements Cloneable, Serializable {
                 for (int j = 0; j < radius; j++) {
                     results[counter] = h.clone();
                     counter++;
-                    h = h.getNeighborPosition(i);
+                    h = h.getNeighborPosition(getDirectionFromNumber(i));
                 }
             }
             return results;
         }
     }
 
-        String getCoordinates
-        
-            () {
+    private static int getNumberFromDirection(Map.Direction direction) {
+        switch (direction) {
+            case NORTHWEST: return 0;
+            case NORTHEAST: return 1;
+            case EAST: return 2;
+            case SOUTHEAST: return 3;
+            case SOUTHWEST: return 4;
+            case WEST: return 5;
+        }
+        throw new RuntimeException();
+    }
+
+    static Map.Direction getDirectionFromNumber(int i) {
+        switch (i) {
+            case 0: return Map.Direction.NORTHWEST;
+            case 1: return Map.Direction.NORTHEAST;
+            case 2: return Map.Direction.EAST;
+            case 3: return Map.Direction.SOUTHEAST;
+            case 4: return Map.Direction.SOUTHWEST;
+            case 5: return Map.Direction.WEST;
+        }
+        throw new RuntimeException();
+    }
+
+
+    String getCoordinates() {
         String s = (Integer.toString(q) + ", " + Integer.toString(r));
             return s;
         }
+
         /**
          * Finds the position that best matches given non-integer coordinates
          *
@@ -178,7 +202,7 @@ public class GridPosition implements Cloneable, Serializable {
     public boolean isAdjacent(GridPosition otherPosition) {
         GridPosition neighbor;
         for (int i = 0; i < 6; i++) {
-            neighbor = getNeighborPosition(i);
+            neighbor = getNeighborPosition(getDirectionFromNumber(i));
             if (otherPosition.equals(neighbor)) {
                 return true;
             }
@@ -189,19 +213,20 @@ public class GridPosition implements Cloneable, Serializable {
     /**
      *
      * @param otherPosition
-     * @return the direction (an int between 0-6)
+     * @return the direction
      */
-    public int getDirectionTo(GridPosition otherPosition) {
+    public Map.Direction getDirectionTo(GridPosition otherPosition) {
+        if (this.equals(otherPosition)) {
+            throw new RuntimeException("Other position ("+otherPosition.toString()+") cannot be same as this ("+toString()+")");
+        }
         GridPosition firstStepInLine = line(otherPosition).get(1);
 
         for (int i = 0; i < 6; i++) {
-            if (getNeighborPosition(i).equals(firstStepInLine)) {
-                return i;
+            if (getNeighborPosition(getDirectionFromNumber(i)).equals(firstStepInLine)) {
+                return getDirectionFromNumber(i);
             }
         }
-        Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, "");       // this should never be reached.
-        return 0;
-        // TODO: test this function
+        throw new RuntimeException();
     }
 
     /**
@@ -237,6 +262,10 @@ public class GridPosition implements Cloneable, Serializable {
      */
     public static int getDistance(GridPosition a, GridPosition b) {
         return ((abs(a.q - b.q) + abs(a.r - b.r) + abs(a.q + a.r - b.q - b.r)) / 2);
+    }
+
+    public int getDistance(GridPosition target) {
+        return getDistance(this, target);
     }
 
     @Override
