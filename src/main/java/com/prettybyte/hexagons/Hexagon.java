@@ -17,29 +17,26 @@
 
 package com.prettybyte.hexagons;
 
-import javafx.scene.paint.Color;
-import static java.lang.Math.PI;
-import static java.lang.Math.sin;
-import static java.lang.Math.cos;
-import static java.lang.Math.sqrt;
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 
 import java.util.ArrayList;
+
+import static java.lang.Math.*;
 
 /**
  * A Hexagon is the building block of the grid.
  */
 public class Hexagon extends Polygon {
 
+    private static final String MAP_MISSING_MESSAGE = "Hexagon must be added to a Map before this operation. See addHexahon()";
     final GridPosition position;
     private Map map;
     private boolean isVisualObstacle;
     private boolean isBlockingPath;
     int aStarGscore, aStarFscore;      // Variables for the A* pathfinding algorithm.
     Hexagon aStarCameFrom;
-    private int graphicsHeight;
-    private double graphicsWidth;
     private int graphicsXoffset;
     private int graphicsYoffset;
 
@@ -49,17 +46,6 @@ public class Hexagon extends Polygon {
      */
     public Hexagon(int q, int r) {
         this.position = new GridPosition(q, r);
-    }
-
-    /**
-     * @param q
-     * @param r
-     * @map map
-     */
-    public Hexagon(int q, int r, Map map) {
-        this.position = new GridPosition(q, r);
-        this.map = map;
-        init();
     }
 
     private void init() {
@@ -134,8 +120,11 @@ public class Hexagon extends Polygon {
 
     // --------------------- Graphics --------------------------------------------
     private double[] calculatePolygonPoints() {
-        graphicsHeight = map.graphicsSize * 2;
-        graphicsWidth = sqrt(3) / 2 * graphicsHeight;
+        if (map == null) {
+            throw new RuntimeException(MAP_MISSING_MESSAGE);
+        }
+        int graphicsHeight = map.graphicsSize * 2;
+        double graphicsWidth = sqrt(3) / 2 * graphicsHeight;
         graphicsXoffset = (int) (graphicsWidth * (double) position.q + 0.5 * graphicsWidth * (double) position.r);
         graphicsYoffset = (int) (3.0 / 4.0 * graphicsHeight * position.r);
         graphicsXoffset = graphicsXoffset + map.graphicsXpadding;
@@ -149,14 +138,6 @@ public class Hexagon extends Polygon {
             polyPoints[(i * 2 + 1)] = (graphicsYoffset + map.graphicsSize * sin(angle));
         }
         return polyPoints;
-    }
-
-    public int getGraphicsXoffset() {
-        return graphicsXoffset;
-    }
-
-    public int getGraphicsYoffset() {
-        return graphicsYoffset;
     }
 
     public static double getGraphicsHexagonWidth(int hexagonSize) {
@@ -175,6 +156,20 @@ public class Hexagon extends Polygon {
         return (3.0/4.0 * hexagonSize * 2.0);
     }
 
+    public int getGraphicsXoffset() {
+        if (graphicsXoffset == 0) {
+            calculatePolygonPoints();
+        }
+        return graphicsXoffset;
+    }
+
+    public int getGraphicsYoffset() {
+        if (graphicsYoffset == 0) {
+            calculatePolygonPoints();
+        }
+        return graphicsYoffset;
+    }
+
     /**
      * This method is the safe way to change the background color since it makes
      * sure that the change is made on the JavaFX Application thread.
@@ -185,11 +180,11 @@ public class Hexagon extends Polygon {
         Platform.runLater(new UIupdater(this, c));
     }
 
-    public int getGraphicsDistanceTo(Hexagon destination) {
+ /*   public int getGraphicsDistanceTo(Hexagon destination) {
         int deltaX = this.getGraphicsXoffset() - destination.getGraphicsXoffset();
         int deltaY = this.getGraphicsYoffset() - destination.getGraphicsYoffset();
         return (int) Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-    }
+    }*/
 
     @Override
     public String toString() {
@@ -201,6 +196,9 @@ public class Hexagon extends Polygon {
     }
 
     public ArrayList<Hexagon> getPositionsOnCircleEdge(int radius) {
+        if (map == null) {
+            throw new RuntimeException(MAP_MISSING_MESSAGE);
+        }
         ArrayList<Hexagon> result = new ArrayList<>();
         for (GridPosition position : position.getPositionsOnCircleEdge(radius)) {
             try {
@@ -213,6 +211,9 @@ public class Hexagon extends Polygon {
     }
 
     public ArrayList<Hexagon> getPositionsInCircleArea(int radius) {
+        if (map == null) {
+            throw new RuntimeException(MAP_MISSING_MESSAGE);
+        }
         ArrayList<Hexagon> result = new ArrayList<>();
         for (GridPosition position : position.getPositionsInCircleArea(radius)) {
             try {
@@ -243,10 +244,15 @@ public class Hexagon extends Polygon {
         return (hexagonObj.getQ() == this.getQ() && hexagonObj.getR() == this.getR());
     }
 
+    /**
+     * This gives the Hexagon access a Map without actually adding it to the Map. It can be useful e.g. if you want
+     * to make some calculations before creating another Hexagon.
+     */
     void setMap(Map map) {
         this.map = map;
         init();
     }
+
 
     class UIupdater implements Runnable {
 

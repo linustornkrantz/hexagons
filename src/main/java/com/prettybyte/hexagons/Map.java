@@ -43,6 +43,11 @@ public class Map {
         this.graphicsYpadding = graphicsYpadding;
     }
 
+    /**
+     * Add a hexagon to the Map
+     *
+     * @return the same hexagon
+     */
     public Hexagon addHexagon(Hexagon hexagon) {
         hexagon.setMap(this);
         hexagons.put(hexagon.position, hexagon);
