@@ -1,32 +1,16 @@
-/*
- * Copyright (C) 2014 Linus Törnkrantz <linus@blom.org>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.prettybyte.hexagons;
 
 import java.io.Serializable;
-import static java.lang.Math.abs;
-import static java.lang.Math.round;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.lang.Math.abs;
+import static java.lang.Math.round;
 
 /**
  * Stores coordinates and has functions for grid calculations, e.g. getLine, ring
  * and distance. These calculations do not depend on how you have placed the
- * Hexagons on the Map. The axial coordinate system is used.
+ * Hexagons on the HexagonMap. The axial coordinate system is used.
  */
 class GridPosition implements Cloneable, Serializable {
 
@@ -55,7 +39,7 @@ class GridPosition implements Cloneable, Serializable {
      * @param direction
      * @return the adjacent position
      */
-    public GridPosition getNeighborPosition(Map.Direction direction) {
+    public GridPosition getNeighborPosition(HexagonMap.Direction direction) {
         int i = getNumberFromDirection(direction);
         int[][] neighbors = new int[][]{
             {0, -1}, {+1, -1}, {+1, 0}, {0, +1}, {-1, +1}, {-1, 0}
@@ -80,7 +64,7 @@ class GridPosition implements Cloneable, Serializable {
         } else {
             GridPosition h = this;
             for (int i = 0; i < radius; i++) {
-                h = h.getNeighborPosition(Map.Direction.SOUTHWEST);
+                h = h.getNeighborPosition(HexagonMap.Direction.SOUTHWEST);
             }
             int counter = 0;
             for (int i = 0; i < 6; i++) {
@@ -103,7 +87,7 @@ class GridPosition implements Cloneable, Serializable {
         return result;
     }
 
-    private static int getNumberFromDirection(Map.Direction direction) {
+    private static int getNumberFromDirection(HexagonMap.Direction direction) {
         switch (direction) {
             case NORTHWEST: return 0;
             case NORTHEAST: return 1;
@@ -115,14 +99,14 @@ class GridPosition implements Cloneable, Serializable {
         throw new RuntimeException();
     }
 
-    static Map.Direction getDirectionFromNumber(int i) {
+    static HexagonMap.Direction getDirectionFromNumber(int i) {
         switch (i) {
-            case 0: return Map.Direction.NORTHWEST;
-            case 1: return Map.Direction.NORTHEAST;
-            case 2: return Map.Direction.EAST;
-            case 3: return Map.Direction.SOUTHEAST;
-            case 4: return Map.Direction.SOUTHWEST;
-            case 5: return Map.Direction.WEST;
+            case 0: return HexagonMap.Direction.NORTHWEST;
+            case 1: return HexagonMap.Direction.NORTHEAST;
+            case 2: return HexagonMap.Direction.EAST;
+            case 3: return HexagonMap.Direction.SOUTHEAST;
+            case 4: return HexagonMap.Direction.SOUTHWEST;
+            case 5: return HexagonMap.Direction.WEST;
         }
         throw new RuntimeException();
     }
@@ -219,7 +203,7 @@ class GridPosition implements Cloneable, Serializable {
      * @param otherPosition
      * @return the direction
      */
-    public Map.Direction getDirectionTo(GridPosition otherPosition) {
+    public HexagonMap.Direction getDirectionTo(GridPosition otherPosition) {
         if (this.equals(otherPosition)) {
             throw new IllegalArgumentException("Other position ("+otherPosition.toString()+") cannot be same as this ("+toString()+")");
         }

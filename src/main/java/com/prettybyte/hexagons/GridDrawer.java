@@ -1,46 +1,26 @@
-/*
- * Copyright (C) 2014 Linus Törnkrantz <linus@blom.org>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.prettybyte.hexagons;
 
-import static java.lang.Math.sqrt;
-import java.util.Collection;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import java.util.Collection;
+import static java.lang.Math.sqrt;
 
-public class GridDrawer {
+class GridDrawer {
     
-    private final Group root;
-    private final Map map;
+    private final HexagonMap map;
     private javafx.scene.text.Font font = new Font(13);
 
     /**
-     *
-     * @param root
      * @param map
      */
-    public GridDrawer(Group root, Map map) {
-        this.root = root;
+    GridDrawer(HexagonMap map) {
         this.map = map;
     }
     
-    public void drawGroup(boolean drawCoordinates) {
+    void draw(Group root) {
         Collection<Hexagon> hexagons = map.getAllHexagons();
         for (Hexagon hexagon : hexagons) {
             hexagon.addEventFilter(MouseEvent.MOUSE_CLICKED,
@@ -48,12 +28,15 @@ public class GridDrawer {
                         @Override
                         public void handle(MouseEvent me) {
                             GridPosition pos = ((Hexagon) me.getSource()).position;
-                            hexClicked(pos);
+                            try {
+                                map.onHexClickedCallback.onHexClicked(map.getHexagon(pos));
+                            } catch (NoHexagonFoundException e) {
+                            }
                         }
             });
             root.getChildren().add(hexagon);
             
-            if (drawCoordinates) {
+            if (map.renderCoordinates) {
                 Text text = new Text(hexagon.position.getCoordinates());
                 text.setFont(font);
                 double textWidth = text.getBoundsInLocal().getWidth();
@@ -69,31 +52,20 @@ public class GridDrawer {
      *
      * @param x
      * @param y
-     * @param hexagonSize
+     * @param hexagonHeight
      * @return the GridPosition that contains that pixel
      */
-    static GridPosition pixelToPosition(int x, int y, int hexagonSize) {
-        double q = ((1.0 / 3.0 * sqrt(3.0) * x - 1.0 / 3.0 * y) / hexagonSize);
-        double r = (2.0 / 3.0 * (double) y / (double) hexagonSize);
+    static GridPosition pixelToPosition(int x, int y, int hexagonHeight, int xPadding, int yPadding) {
+        x = x - xPadding;
+        y = y - yPadding;
+        double hexagonRadius = ((double) hexagonHeight) / 2;
+        double q = ((1.0 / 3.0 * sqrt(3.0) * x - 1.0 / 3.0 * y) / hexagonRadius);
+        double r = (2.0 / 3.0 * (double) y / hexagonRadius);
         return (GridPosition.hexRound(q, r));
     }
 
-    /**
-     * Sets the font used to draw the hexagon positions
-     *
-     * @param font
-     */
-    public void setFont(Font font) {
+    void setFont(Font font) {
         this.font = font;
     }
 
-    /**
-     * This function can be overridden. This is where you act when the user
-     * clicks somewhere on the grid.
-     *
-     * @param position the grid position that was clicked
-     */
-    public void hexClicked(GridPosition position) {
-    }
-    
 }

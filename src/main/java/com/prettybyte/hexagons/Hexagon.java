@@ -1,28 +1,9 @@
-/*
- * Copyright (C) 2014 Linus Törnkrantz <linus@blom.org>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package com.prettybyte.hexagons;
 
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
-
 import java.util.ArrayList;
-
 import static java.lang.Math.*;
 
 /**
@@ -30,9 +11,8 @@ import static java.lang.Math.*;
  */
 public class Hexagon extends Polygon {
 
-    private static final String MAP_MISSING_MESSAGE = "Hexagon must be added to a Map before this operation. See addHexahon()";
     final GridPosition position;
-    private Map map;
+    private HexagonMap map;
     private boolean isVisualObstacle;
     private boolean isBlockingPath;
     int aStarGscore, aStarFscore;      // Variables for the A* pathfinding algorithm.
@@ -41,14 +21,16 @@ public class Hexagon extends Polygon {
     private int graphicsYoffset;
 
     /**
-     * @param q
-     * @param r
+     * The position of the Hexagon is specified with axial coordinates
+     *
+     * @param q the Q coordinate
+     * @param r the R coordinate
      */
     public Hexagon(int q, int r) {
         this.position = new GridPosition(q, r);
     }
 
-    private void init() {
+    void init() {
         this.setStroke(Color.BLACK);
         for (double p : calculatePolygonPoints()) {
             this.getPoints().add(p);
@@ -72,17 +54,8 @@ public class Hexagon extends Polygon {
     }
 
     /**
-     * @return the axial coordinates of the Hexagon
-     */
-//    public GridPosition getPosition() {
-  //      return position;
-    //}
-
-    /**
      * This affects the field of view calculations. If true, the hexagons behind
      * this hexagon cannot be seen (but this hexagon can still be seen).
-     *
-     * @param b
      */
     public void setIsVisualObstacle(boolean b) {
         isVisualObstacle = b;
@@ -102,8 +75,6 @@ public class Hexagon extends Polygon {
      * This affects the pathfinding calculations. If true, the algorithm will
      * try to find a path around this Hexagon.
      * If you want to have more control over this, you can supply your own class implementing IPathInfoSupplier to the pathfinding method.
-     *
-     * @param b
      */
     public void setIsBlockingPath(boolean b) {
         isBlockingPath = b;
@@ -120,10 +91,8 @@ public class Hexagon extends Polygon {
 
     // --------------------- Graphics --------------------------------------------
     private double[] calculatePolygonPoints() {
-        if (map == null) {
-            throw new RuntimeException(MAP_MISSING_MESSAGE);
-        }
-        int graphicsHeight = map.graphicsSize * 2;
+        checkMap();
+        int graphicsHeight = map.hexagonSize * 2;
         double graphicsWidth = sqrt(3) / 2 * graphicsHeight;
         graphicsXoffset = (int) (graphicsWidth * (double) position.q + 0.5 * graphicsWidth * (double) position.r);
         graphicsYoffset = (int) (3.0 / 4.0 * graphicsHeight * position.r);
@@ -134,26 +103,10 @@ public class Hexagon extends Polygon {
         double angle;
         for (int i = 0; i < 6; i++) {
             angle = 2 * PI / 6 * (i + 0.5);
-            polyPoints[(i * 2)] = (graphicsXoffset + map.graphicsSize * cos(angle));
-            polyPoints[(i * 2 + 1)] = (graphicsYoffset + map.graphicsSize * sin(angle));
+            polyPoints[(i * 2)] = (graphicsXoffset + map.hexagonSize * cos(angle));
+            polyPoints[(i * 2 + 1)] = (graphicsYoffset + map.hexagonSize * sin(angle));
         }
         return polyPoints;
-    }
-
-    public static double getGraphicsHexagonWidth(int hexagonSize) {
-        return sqrt(3) / 2 * hexagonSize * 2;
-    }
-
-    public static int getGraphicsHexagonHeight(int hexagonSize) {
-        return hexagonSize * 2;
-    }
-
-    public static double getGraphicsHorizontalDistanceBetweenHexagons(int hexagonSize) {
-        return getGraphicsHexagonWidth(hexagonSize);
-    }
-
-    public static double getGraphicsverticalDistanceBetweenHexagons(int hexagonSize) {
-        return (3.0/4.0 * hexagonSize * 2.0);
     }
 
     public int getGraphicsXoffset() {
@@ -180,49 +133,113 @@ public class Hexagon extends Polygon {
         Platform.runLater(new UIupdater(this, c));
     }
 
- /*   public int getGraphicsDistanceTo(Hexagon destination) {
-        int deltaX = this.getGraphicsXoffset() - destination.getGraphicsXoffset();
-        int deltaY = this.getGraphicsYoffset() - destination.getGraphicsYoffset();
-        return (int) Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-    }*/
-
     @Override
     public String toString() {
         return "Hexagon q:"+position.q +" r:"+position.r;
     }
 
-    public Map.Direction getDirectionTo(Hexagon target) {
+    public HexagonMap.Direction getDirectionTo(Hexagon target) {
         return position.getDirectionTo(target.position);
     }
 
-    public ArrayList<Hexagon> getPositionsOnCircleEdge(int radius) {
+    /**
+     * Returns all Hexagons that are located a certain distance from here
+     */
+    public ArrayList<Hexagon> getHexagonsOnRingEdge(int radius) {
+        checkMap();
+        return Calculations.getHexagonsOnRingEdge(this, radius, map);
+    }
+
+    /**
+     * Returns all Hexagons that are located within a certain distance from here
+     */
+    public ArrayList<Hexagon> getHexagonsInRingArea(int radius) {
+        checkMap();
+        return Calculations.getHexagonsInRingArea(this, radius, map);
+    }
+
+    private void checkMap() {
         if (map == null) {
-            throw new RuntimeException(MAP_MISSING_MESSAGE);
+            throw new RuntimeException("Hexagon must be added to a HexagonMap before this operation. See addHexahon()");
         }
+    }
+
+    /**
+     * Finds the neighbour of this Hexagon
+     *
+     * @param direction
+     * @return neighbour
+     * @throws NoHexagonFoundException
+     */
+    public Hexagon getNeighbour(HexagonMap.Direction direction) throws NoHexagonFoundException {
+        checkMap();
+        GridPosition neighborPosition = position.getNeighborPosition(direction);
+        return map.getHexagon(neighborPosition);
+    }
+
+    /**
+     * Finds all neighbors of this Hexagon
+     */
+    public ArrayList<Hexagon> getNeighbours() {
         ArrayList<Hexagon> result = new ArrayList<>();
-        for (GridPosition position : position.getPositionsOnCircleEdge(radius)) {
+        for (int i = 0; i < 6; i++) {
             try {
-                Hexagon hexagon = map.getHexagon(position);
-                result.add(hexagon);
-            } catch (NoHexagonException e) {
+                Hexagon neighbour = getNeighbour(GridPosition.getDirectionFromNumber(i));
+                result.add(neighbour);
+            } catch (NoHexagonFoundException ex) {
             }
         }
         return result;
     }
 
-    public ArrayList<Hexagon> getPositionsInCircleArea(int radius) {
-        if (map == null) {
-            throw new RuntimeException(MAP_MISSING_MESSAGE);
-        }
-        ArrayList<Hexagon> result = new ArrayList<>();
-        for (GridPosition position : position.getPositionsInCircleArea(radius)) {
-            try {
-                Hexagon hexagon = map.getHexagon(position);
-                result.add(hexagon);
-            } catch (NoHexagonException e) {
-            }
-        }
-        return result;
+    /**
+     * Finds the cheapest path from start to the goal. The A* algorithm is used.
+     *
+     * @param destination the target Hexagon
+     * @param pathInfoSupplier a class implementing the IPathInfoSupplier interface. This can be used to add inpassable hexagons and customize the movement costs.
+     * @return an array of Hexagons, sorted so that the first step comes first.
+     * @throws NoPathFoundException if there exists no path between start and the goal
+     */
+    public ArrayList<Hexagon> getPathTo(Hexagon destination, IPathInfoSupplier pathInfoSupplier) throws NoPathFoundException {
+        checkMap();
+        return Calculations.getPathBetween(this, destination, pathInfoSupplier);
+    }
+
+    /**
+     * Finds the cheapest path from here to the destination. The A* algorithm is used.
+     * This method uses the method isBlockingPath() in Hexagon and the movement cost between neighboring hexagons is always 1.
+     *
+     * @param destination the target Hexagon
+     * @return an array of Hexagons, sorted so that the first step comes first.
+     * @throws NoPathFoundException if there exists no path between start and the
+     * goal
+     */
+    public ArrayList<Hexagon> getPathTo(Hexagon destination) throws NoPathFoundException {
+        checkMap();
+        return Calculations.getPathBetween(this, destination, new HexagonMap.DefaultPathInfoSupplier());
+    }
+
+    /**
+     * Finds all Hexagons that are on a line between this and destination
+     *
+     */
+    public ArrayList<Hexagon> getLine(Hexagon origin, Hexagon destination) {
+        checkMap();
+        return Calculations.getLine(origin.position, destination.position, map);
+    }
+
+    /**
+     * Calculates all Hexagons that are visible from this Hexagon. The
+     * line of sight can be blocked by Hexagons that has isVisualObstacle ==
+     * true. NOTE: Accuracy is not guaranteed!
+     *
+     * @param visibleRange a limit of how long distance can be seen assuming
+     * there are no obstacles
+     * @return an array of Hexagons that are visible
+     */
+    public ArrayList<Hexagon> getVisibleHexes(int visibleRange) {
+        checkMap();
+        return Calculations.getVisibleHexes(this, visibleRange, map);
     }
 
     public int getDistance(Hexagon target) {
@@ -245,17 +262,15 @@ public class Hexagon extends Polygon {
     }
 
     /**
-     * This gives the Hexagon access a Map without actually adding it to the Map. It can be useful e.g. if you want
+     * This gives the Hexagon access a HexagonMap without actually adding it to the HexagonMap. It can be useful e.g. if you want
      * to make some calculations before creating another Hexagon.
      */
-    void setMap(Map map) {
+    void setMap(HexagonMap map) {
         this.map = map;
         init();
     }
 
-
     class UIupdater implements Runnable {
-
         private final Hexagon h;
         private final Color c;
 
@@ -269,5 +284,4 @@ public class Hexagon extends Polygon {
             h.setFill(c);
         }
     }
-
 }
