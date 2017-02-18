@@ -29,7 +29,7 @@ class GridDrawer {
                         public void handle(MouseEvent me) {
                             GridPosition pos = ((Hexagon) me.getSource()).position;
                             try {
-                                map.onHexClickedCallback.onHexClicked(map.getHexagon(pos));
+                                map.onHexClickedCallback.onClicked(map.getHexagon(pos));
                             } catch (NoHexagonFoundException e) {
                             }
                         }

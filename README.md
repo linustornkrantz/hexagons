@@ -4,11 +4,11 @@ Hexagons
 This is a hexagon library for JavaFX. 
 
 Features:
-- Render the hexagons on the screen
 - Pathfinding
 - Field of View
 - Calculate distance between hexes, line drawing and other useful functions
 - Transform an image file (e.g. png) into hexagons
+- Render the hexagons on the screen
 
 On http://www.redblobgames.com/grids/hexagons you can find a lot of information about the mathematical properties of hexagons. In fact, I had much help from the information there when writing this library.
 
@@ -38,7 +38,7 @@ map.render(group);                         // Renders into a JavaFX Group
 
 To be notified when the user clicks on a Hexagon:
 ```java
-map.setOnHexClickedCallback(hexagon -> hexagon.setBackgroundColor(Color.RED));
+map.setOnHexagonClickedCallback(hexagon -> hexagon.setBackgroundColor(Color.BLUE));
 ```
 
 

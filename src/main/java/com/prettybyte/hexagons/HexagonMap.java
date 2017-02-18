@@ -17,9 +17,9 @@ public class HexagonMap {
     private MapGenerator mapGenerator;
     boolean renderCoordinates = false;
     private GridDrawer gridDrawer = new GridDrawer(this);
-    IHexClicked onHexClickedCallback = new IHexClicked() {
+    IHexagonClicked onHexClickedCallback = new IHexagonClicked() {
         @Override
-        public void onHexClicked(Hexagon hexagon) {
+        public void onClicked(Hexagon hexagon) {
         }
     };
 
@@ -224,7 +224,7 @@ public class HexagonMap {
      * A callback when the user clicks on a Hexagon
      *
      */
-    public void setOnHexClickedCallback(IHexClicked callback) {
+    public void setOnHexagonClickedCallback(IHexagonClicked callback) {
         onHexClickedCallback = callback;
     }
 
