@@ -5,11 +5,13 @@ import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+
 import java.util.Collection;
+
 import static java.lang.Math.sqrt;
 
 class GridDrawer {
-    
+
     private final HexagonMap map;
     private javafx.scene.text.Font font = new Font(13);
 
@@ -19,7 +21,7 @@ class GridDrawer {
     GridDrawer(HexagonMap map) {
         this.map = map;
     }
-    
+
     void draw(Group root) {
         Collection<Hexagon> hexagons = map.getAllHexagons();
         for (Hexagon hexagon : hexagons) {
@@ -33,9 +35,9 @@ class GridDrawer {
                             } catch (NoHexagonFoundException e) {
                             }
                         }
-            });
+                    });
             root.getChildren().add(hexagon);
-            
+
             if (map.renderCoordinates) {
                 Text text = new Text(hexagon.position.getCoordinates());
                 text.setFont(font);
@@ -49,7 +51,6 @@ class GridDrawer {
     }
 
     /**
-     *
      * @param x
      * @param y
      * @param hexagonHeight

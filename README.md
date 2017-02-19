@@ -36,6 +36,15 @@ To render the hexagons:
 map.render(group);                         // Renders into a JavaFX Group 
 ```
 
+The Hexagon class extends javafx.scene.shape.Polygon which means that you can change the appearance like this:
+
+```java
+for (Hexagon h : map.getAllHexagons()) {
+            h.setStrokeWidth(2.0);
+            h.setStroke(Color.WHITE);
+        }
+```
+
 To be notified when the user clicks on a Hexagon:
 ```java
 map.setOnHexagonClickedCallback(hexagon -> hexagon.setBackgroundColor(Color.BLUE));

@@ -1,5 +1,5 @@
 package com.prettybyte.hexagons;
 
-public interface IHexagonClicked {
+public interface IHexagonClickHandler {
     void onClicked(Hexagon hexagon);
 }

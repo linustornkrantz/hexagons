@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
 
@@ -42,7 +43,7 @@ class GridPosition implements Cloneable, Serializable {
     public GridPosition getNeighborPosition(HexagonMap.Direction direction) {
         int i = getNumberFromDirection(direction);
         int[][] neighbors = new int[][]{
-            {0, -1}, {+1, -1}, {+1, 0}, {0, +1}, {-1, +1}, {-1, 0}
+                {0, -1}, {+1, -1}, {+1, 0}, {0, +1}, {-1, +1}, {-1, 0}
         };
         int[] d = neighbors[i];
         return new GridPosition(q + d[0], r + d[1]);
@@ -50,7 +51,7 @@ class GridPosition implements Cloneable, Serializable {
 
     /**
      * Finds all positions that are on the edge of a circle in which this position is the
-     * center. 
+     * center.
      * If radius is 0, an array with only this GridPosition will be returned.
      *
      * @param radius
@@ -89,24 +90,36 @@ class GridPosition implements Cloneable, Serializable {
 
     private static int getNumberFromDirection(HexagonMap.Direction direction) {
         switch (direction) {
-            case NORTHWEST: return 0;
-            case NORTHEAST: return 1;
-            case EAST: return 2;
-            case SOUTHEAST: return 3;
-            case SOUTHWEST: return 4;
-            case WEST: return 5;
+            case NORTHWEST:
+                return 0;
+            case NORTHEAST:
+                return 1;
+            case EAST:
+                return 2;
+            case SOUTHEAST:
+                return 3;
+            case SOUTHWEST:
+                return 4;
+            case WEST:
+                return 5;
         }
         throw new RuntimeException();
     }
 
     static HexagonMap.Direction getDirectionFromNumber(int i) {
         switch (i) {
-            case 0: return HexagonMap.Direction.NORTHWEST;
-            case 1: return HexagonMap.Direction.NORTHEAST;
-            case 2: return HexagonMap.Direction.EAST;
-            case 3: return HexagonMap.Direction.SOUTHEAST;
-            case 4: return HexagonMap.Direction.SOUTHWEST;
-            case 5: return HexagonMap.Direction.WEST;
+            case 0:
+                return HexagonMap.Direction.NORTHWEST;
+            case 1:
+                return HexagonMap.Direction.NORTHEAST;
+            case 2:
+                return HexagonMap.Direction.EAST;
+            case 3:
+                return HexagonMap.Direction.SOUTHEAST;
+            case 4:
+                return HexagonMap.Direction.SOUTHWEST;
+            case 5:
+                return HexagonMap.Direction.WEST;
         }
         throw new RuntimeException();
     }
@@ -114,16 +127,16 @@ class GridPosition implements Cloneable, Serializable {
 
     String getCoordinates() {
         String s = (Integer.toString(q) + ", " + Integer.toString(r));
-            return s;
-        }
+        return s;
+    }
 
-        /**
-         * Finds the position that best matches given non-integer coordinates
-         *
-         * @param q
-         * @param r
-         * @return
-         */
+    /**
+     * Finds the position that best matches given non-integer coordinates
+     *
+     * @param q
+     * @param r
+     * @return
+     */
     public static GridPosition hexRound(double q, double r) {
         double cubeX = q;
         double cubeY = r;
@@ -183,7 +196,6 @@ class GridPosition implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @param otherPosition
      * @return true if the positions are adjacent
      */
@@ -199,13 +211,12 @@ class GridPosition implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @param otherPosition
      * @return the direction
      */
     public HexagonMap.Direction getDirectionTo(GridPosition otherPosition) {
         if (this.equals(otherPosition)) {
-            throw new IllegalArgumentException("Other position ("+otherPosition.toString()+") cannot be same as this ("+toString()+")");
+            throw new IllegalArgumentException("Other position (" + otherPosition.toString() + ") cannot be same as this (" + toString() + ")");
         }
         GridPosition firstStepInLine = line(otherPosition).get(1);
 

@@ -4,9 +4,11 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
+
 import static java.lang.Math.sqrt;
 
 public class HexagonMap {
@@ -17,14 +19,15 @@ public class HexagonMap {
     private MapGenerator mapGenerator;
     boolean renderCoordinates = false;
     private GridDrawer gridDrawer = new GridDrawer(this);
-    IHexagonClicked onHexClickedCallback = new IHexagonClicked() {
+    private HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
+    IHexagonClickHandler onHexClickedCallback = new IHexagonClickHandler() {
         @Override
         public void onClicked(Hexagon hexagon) {
         }
     };
 
     public enum Direction {NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST}
-    private HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
+
 
     /**
      * Creates an empty HexagonMap
@@ -38,8 +41,8 @@ public class HexagonMap {
     /**
      * Generates a HexagonMap from an Image
      *
-     * @param hexagonSize the distance between the center and one corner
-     * @param image an Image which will be used to generate a HexagonMap
+     * @param hexagonSize     the distance between the center and one corner
+     * @param image           an Image which will be used to generate a HexagonMap
      * @param mapWidthInHexes the number of hexagons on the x-axis
      */
     public HexagonMap(int hexagonSize, Image image, int mapWidthInHexes) {
@@ -58,18 +61,17 @@ public class HexagonMap {
     /**
      * Generates a HexagonMap from an Image
      *
-     * @param hexagonSize the distance between the center and one corner
-     * @param image an Image which will be used to generate a HexagonMap
+     * @param hexagonSize     the distance between the center and one corner
+     * @param image           an Image which will be used to generate a HexagonMap
      * @param mapWidthInHexes the number of hexagons on the x-axis
-     * @param hexagonCreator a class implementing IHexagonCreator. This is how you decide HOW the HexagonMap should be
-     *                       generated from the Image. In it's most basic form:
-     *
-     *                          public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) {
-     *                          Hexagon h = new Hexagon(q, r);
-     *                          h.setBackgroundColor(imagePixelColor);
-     *                          map.addHexagon(h);
-     *                          }
-     *
+     * @param hexagonCreator  a class implementing IHexagonCreator. This is how you decide HOW the HexagonMap should be
+     *                        generated from the Image. In it's most basic form:
+     *                        <p>
+     *                        public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) {
+     *                        Hexagon h = new Hexagon(q, r);
+     *                        h.setBackgroundColor(imagePixelColor);
+     *                        map.addHexagon(h);
+     *                        }
      */
     public HexagonMap(int hexagonSize, Image image, int mapWidthInHexes, IHexagonCreator hexagonCreator) {
         this.hexagonSize = hexagonSize;
@@ -102,7 +104,7 @@ public class HexagonMap {
     }
 
     double getGraphicsverticalDistanceBetweenHexagons() {
-        return (3.0/4.0 * hexagonSize * 2.0);
+        return (3.0 / 4.0 * hexagonSize * 2.0);
     }
 
     /**
@@ -127,7 +129,6 @@ public class HexagonMap {
     }
 
     /**
-     *
      * @return the hexagon that is rendered on a specific position on the screen
      * @throws NoHexagonFoundException if there is no Hexagon at the specified position
      */
@@ -147,7 +148,7 @@ public class HexagonMap {
         GridPosition position = new GridPosition(q, r);
         Hexagon result = hexagons.get(position);
         if (result == null) {
-            throw new NoHexagonFoundException("There is no Hexagon on q:"+q+" r:"+r);
+            throw new NoHexagonFoundException("There is no Hexagon on q:" + q + " r:" + r);
         }
         return result;
     }
@@ -161,7 +162,6 @@ public class HexagonMap {
     }
 
     /**
-     *
      * @return all Hexagons that has been added to the map
      */
     public Collection<Hexagon> getAllHexagons() {
@@ -222,10 +222,9 @@ public class HexagonMap {
 
     /**
      * A callback when the user clicks on a Hexagon
-     *
      */
-    public void setOnHexagonClickedCallback(IHexagonClicked callback) {
-        onHexClickedCallback = callback;
+    public void setHexagonClickHandler(IHexagonClickHandler handler) {
+        onHexClickedCallback = handler;
     }
 
 }

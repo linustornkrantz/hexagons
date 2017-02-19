@@ -3,7 +3,9 @@ package com.prettybyte.hexagons;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
+
 import java.util.ArrayList;
+
 import static java.lang.Math.*;
 
 /**
@@ -38,7 +40,6 @@ public class Hexagon extends Polygon {
     }
 
     /**
-     *
      * @return axial Q-value
      */
     public int getQ() {
@@ -46,7 +47,6 @@ public class Hexagon extends Polygon {
     }
 
     /**
-     *
      * @return axial R-value
      */
     public int getR() {
@@ -135,7 +135,7 @@ public class Hexagon extends Polygon {
 
     @Override
     public String toString() {
-        return "Hexagon q:"+position.q +" r:"+position.r;
+        return "Hexagon q:" + position.q + " r:" + position.r;
     }
 
     public HexagonMap.Direction getDirectionTo(Hexagon target) {
@@ -195,7 +195,7 @@ public class Hexagon extends Polygon {
     /**
      * Finds the cheapest path from start to the goal. The A* algorithm is used.
      *
-     * @param destination the target Hexagon
+     * @param destination      the target Hexagon
      * @param pathInfoSupplier a class implementing the IPathInfoSupplier interface. This can be used to add inpassable hexagons and customize the movement costs.
      * @return an array of Hexagons, sorted so that the first step comes first.
      * @throws NoPathFoundException if there exists no path between start and the goal
@@ -212,7 +212,7 @@ public class Hexagon extends Polygon {
      * @param destination the target Hexagon
      * @return an array of Hexagons, sorted so that the first step comes first.
      * @throws NoPathFoundException if there exists no path between start and the
-     * goal
+     *                              goal
      */
     public ArrayList<Hexagon> getPathTo(Hexagon destination) throws NoPathFoundException {
         checkMap();
@@ -221,7 +221,6 @@ public class Hexagon extends Polygon {
 
     /**
      * Finds all Hexagons that are on a line between this and destination
-     *
      */
     public ArrayList<Hexagon> getLine(Hexagon origin, Hexagon destination) {
         checkMap();
@@ -234,7 +233,7 @@ public class Hexagon extends Polygon {
      * true. NOTE: Accuracy is not guaranteed!
      *
      * @param visibleRange a limit of how long distance can be seen assuming
-     * there are no obstacles
+     *                     there are no obstacles
      * @return an array of Hexagons that are visible
      */
     public ArrayList<Hexagon> getVisibleHexes(int visibleRange) {
