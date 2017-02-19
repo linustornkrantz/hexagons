@@ -20,7 +20,7 @@ public class HexagonMap {
     boolean renderCoordinates = false;
     private GridDrawer gridDrawer = new GridDrawer(this);
     private HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
-    IHexagonClickHandler onHexClickedCallback = new IHexagonClickHandler() {
+    IHexagonClickedCallback onHexClickedCallback = new IHexagonClickedCallback() {
         @Override
         public void onClicked(Hexagon hexagon) {
         }
@@ -223,8 +223,8 @@ public class HexagonMap {
     /**
      * A callback when the user clicks on a Hexagon
      */
-    public void setHexagonClickHandler(IHexagonClickHandler handler) {
-        onHexClickedCallback = handler;
+    public void setOnHexagonClickedCallback(IHexagonClickedCallback callback) {
+        onHexClickedCallback = callback;
     }
 
 }
