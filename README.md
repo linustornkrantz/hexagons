@@ -64,16 +64,16 @@ Or if you want more control over the hexagon generation:
 
 ```java
 Image image = new Image("path/to/image");
-        Map map = new Map(5, image, 40, new IHexagonCreator() {
-            @Override
-            public void createHexagon(int q, int r, Color imagePixelColor, Map map) {
-                if (imagePixelColor.getBrightness() > 0.7) {
-                    Hexagon h = new Hexagon(q, r);
-                    h.setBackgroundColor(Color.GREEN);
-                    map.addHexagon(h);
-                }
-            }
-        });
+HexagonMap map = new HexagonMap(5, image, 40, new IHexagonCreator() {
+    @Override
+    public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) {
+        if (imagePixelColor.getBrightness() > 0.7) {
+            Hexagon h = new Hexagon(q, r);
+            h.setBackgroundColor(Color.GREEN);
+            map.addHexagon(h);
+        }
+    }
+});
 ```
 
 Full example
