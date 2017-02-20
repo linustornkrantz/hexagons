@@ -109,6 +109,10 @@ public class Hexagon extends Polygon {
         return polyPoints;
     }
 
+    /**
+     *
+     * @return where this Hexagon is when rendererd into a JavaFX Group
+     */
     public int getGraphicsXoffset() {
         if (graphicsXoffset == 0) {
             calculatePolygonPoints();
@@ -116,6 +120,10 @@ public class Hexagon extends Polygon {
         return graphicsXoffset;
     }
 
+    /**
+     *
+     * @return where this Hexagon is when rendererd into a JavaFX Group
+     */
     public int getGraphicsYoffset() {
         if (graphicsYoffset == 0) {
             calculatePolygonPoints();
@@ -138,6 +146,11 @@ public class Hexagon extends Polygon {
         return "Hexagon q:" + position.q + " r:" + position.r;
     }
 
+    /**
+     * Finds the direction (NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST or WEST)
+     * If target is a neighbour, then it is quite simple.
+     * If target is not a neighbour, this returns the direction to the first step on a line to the target.
+     */
     public HexagonMap.Direction getDirectionTo(Hexagon target) {
         return position.getDirectionTo(target.position);
     }
@@ -241,6 +254,9 @@ public class Hexagon extends Polygon {
         return Calculations.getVisibleHexes(this, visibleRange, map);
     }
 
+    /**
+     *  Calculates the distance (number of hexagons) to the target hexagon
+     */
     public int getDistance(Hexagon target) {
         return position.getDistance(target.position);
     }

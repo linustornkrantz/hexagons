@@ -50,6 +50,32 @@ To be notified when the user clicks on a Hexagon:
 map.setOnHexagonClickedCallback(hexagon -> hexagon.setBackgroundColor(Color.BLUE));
 ```
 
+Pathfinding
+===========
+Basic pathfinding:
+
+```java
+Hexagon start = map.getHexagon(-21, 74);
+Hexagon destination = map.getHexagon(-27, 67);
+ArrayList<Hexagon> path = start.getPathTo(destination);
+```
+
+If you need more control, you may want to extend the Hexagon class and implement an IPathInfoSupplier:
+
+```java
+
+ArrayList<Hexagon> path = start.getPathTo(destination, new IPathInfoSupplier() {
+    @Override
+    public boolean isBlockingPath(Hexagon hexagon) {
+        return ((MyHexagon) hexagon).canHeroMoveThroughHere();
+    }
+
+    @Override
+    public int getMovementCost(Hexagon from, Hexagon to) {
+        return ((MyHexagon) hexagon).isThereRoadBetween(from, to) ? 1 : 2;
+    }
+});
+```
 
 Generate hexagons from an image file
 ====================================
