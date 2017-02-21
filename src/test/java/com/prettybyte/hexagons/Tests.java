@@ -5,6 +5,16 @@ import org.junit.Test;
 
 public class Tests {
     @Test
+    public void remove() {
+        HexagonMap map = new HexagonMap(20);
+        Hexagon h = new Hexagon(6,7);
+        map.addHexagon(h);
+        Assert.assertTrue(map.getAllHexagons().size()==1);
+        map.removeHexagon(h);
+        Assert.assertTrue(map.getAllHexagons().size()==0);
+    }
+
+    @Test
     public void direction() {
         HexagonMap map = new HexagonMap(10);
         Hexagon center = map.addHexagon(new Hexagon(3, 3));

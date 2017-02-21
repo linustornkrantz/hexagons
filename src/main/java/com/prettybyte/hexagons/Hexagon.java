@@ -199,7 +199,7 @@ public class Hexagon extends Polygon {
             try {
                 Hexagon neighbour = getNeighbour(GridPosition.getDirectionFromNumber(i));
                 result.add(neighbour);
-            } catch (NoHexagonFoundException ex) {
+            } catch (NoHexagonFoundException ignored) {
             }
         }
         return result;
@@ -263,9 +263,6 @@ public class Hexagon extends Polygon {
 
     /**
      * Two Hexagons are equal if they have the same q and r
-     *
-     * @param obj
-     * @return
      */
     @Override
     public boolean equals(Object obj) {
@@ -282,7 +279,9 @@ public class Hexagon extends Polygon {
      */
     void setMap(HexagonMap map) {
         this.map = map;
-        init();
+        if (map != null) {
+            init();
+        }
     }
 
     class UIupdater implements Runnable {

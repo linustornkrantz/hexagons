@@ -2,7 +2,6 @@ package com.prettybyte.hexagons;
 
 import javafx.scene.Group;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 import java.util.Collection;
@@ -20,10 +19,7 @@ public class HexagonMap {
     boolean renderCoordinates = false;
     private GridDrawer gridDrawer = new GridDrawer(this);
     private HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
-    IHexagonClickedCallback onHexClickedCallback = new IHexagonClickedCallback() {
-        @Override
-        public void onClicked(Hexagon hexagon) {
-        }
+    IHexagonClickedCallback onHexClickedCallback = hexagon -> {
     };
 
     public enum Direction {NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST}
@@ -48,13 +44,10 @@ public class HexagonMap {
     public HexagonMap(int hexagonSize, Image image, int mapWidthInHexes) {
         this.hexagonSize = hexagonSize;
         mapGenerator = new MapGenerator(this, image, mapWidthInHexes);
-        mapGenerator.generate(new IHexagonCreator() {
-            @Override
-            public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) {
-                Hexagon h = new Hexagon(q, r);
-                h.setBackgroundColor(imagePixelColor);
-                map.addHexagon(h);
-            }
+        mapGenerator.generate((q, r, imagePixelColor, map) -> {
+            Hexagon h = new Hexagon(q, r);
+            h.setBackgroundColor(imagePixelColor);
+            map.addHexagon(h);
         });
     }
 
@@ -91,7 +84,7 @@ public class HexagonMap {
         }
     }
 
-    double getGraphicsHexagonWidth() {
+    private double getGraphicsHexagonWidth() {
         return sqrt(3) / 2 * hexagonSize * 2;
     }
 
@@ -120,12 +113,10 @@ public class HexagonMap {
 
     /**
      * Removes a Hexagon from the HexagonMap
-     *
-     * @return the same hexagon
      */
     public void removeHexagon(Hexagon hexagon) {
         hexagon.setMap(null);
-        hexagons.remove(hexagon);
+        hexagons.remove(hexagon.position);
     }
 
     /**
