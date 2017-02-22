@@ -15,7 +15,7 @@ On http://www.redblobgames.com/grids/hexagons you can find a lot of information 
 Installation
 ============
 ```shell
-git clone https://gitlab.com/linustornkrantz/hexagons.git
+git clone https://github.com/linustornkrantz/hexagons.git
 ```
 To create a jar that can be used in your project: 
 
